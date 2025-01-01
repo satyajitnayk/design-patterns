@@ -1,0 +1,69 @@
+# Ignore object files and binaries
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+*.dylib
+
+# Ignore build directories
+/build/
+*/build/
+*.vs/
+bin/
+lib/
+
+# Ignore temporary files and editor/IDE files
+*.tmp
+*.swp
+*.swo
+*~
+*.log
+
+# Ignore CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore Visual Studio files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.user
+
+# Ignore Xcode files
+*.xcworkspace
+*.xcuserdata/
+
+# Ignore CLion files
+.idea/
+*.iml
+
+# Ignore other IDEs and tools
+*.DS_Store  # macOS Finder metadata
+.vscode/    # Visual Studio Code
+.vscode/*
+
+# Ignore generated documentation
+docs/generated/
+*.dox
+*.docset
+
+# Ignore debugging and profiling tools
+*.profraw
+*.gcda
+*.gcno
+*.gcov
+*.memgraph
+*.asan
+
+# Ignore custom files
+*.config
+*.cache
+*.dat
+*.bak
+
+out
