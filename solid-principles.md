@@ -152,51 +152,72 @@ int main() {
 
 ### 3. **Liskov Substitution Principle (LSP)**
 
-**Definition**: Subtypes must be substitutable for their base types without altering the correctness of the program.
-
-#### Example Violating LSP:
+**Definition**: Subtypes should work everywhere their base types are used without breaking the program or changing its expected behavior.
 
 ```cpp
 #include <iostream>
+#include <vector>
+#include <memory>
 using namespace std;
 
-class Bird {
+// Base Class
+class Shape {
 public:
-    virtual void fly() {cout << "Bird is flying" <<endl; }
+    virtual double area() const = 0; // Pure virtual function
+    virtual ~Shape() = default;     // Virtual destructor
 };
 
-class Penguin : public Bird {
+// Derived Class: Rectangle
+class Rectangle : public Shape {
+private:
+    double width, height;
 public:
-    void fly() override { throwlogic_error("Penguins can't fly!"); }
+    Rectangle(double w, double h) : width(w), height(h) {}
+    double area() const override {
+        return width * height;
+    }
 };
+
+// Derived Class: Square
+class Square : public Shape {
+private:
+    double side;
+public:
+    Square(double s) : side(s) {}
+    double area() const override {
+        return side * side;
+    }
+};
+
+// Function to demonstrate LSP
+void printAreas(const vector<shared_ptr<Shape>>& shapes) {
+    for (const auto& shape : shapes) {
+        cout << "Area: " << shape->area() << endl;
+    }
+}
+
+int main() {
+    // Create instances of Rectangle and Square
+    auto rectangle = make_shared<Rectangle>(4.0, 5.0);
+    auto square = make_shared<Square>(3.0);
+
+    // Store them in a vector of Shape pointers
+    vector<shared_ptr<Shape>> shapes = {rectangle, square};
+
+    // LSP: Both Rectangle and Square can be treated as Shape
+    printAreas(shapes);
+
+    return 0;
+}
 ```
 
-**Problem**: A `Penguin` cannot fly, so substituting `Penguin` for `Bird` breaks the program.
+- **Base Class**: Shape defines a virtual method area() for all derived shapes.
+- **Derived Classes**: Specific shapes (Rectangle and Square) implement area() correctly and can replace the Shape base type without breaking the functionality.
+- **LSP Compliance**: Any instance of Shape can be substituted with a Rectangle or Square without altering program correctness.
 
-#### Example Following LSP:
+**What Happens If LSP Is Violated?**
 
-```cpp
-#include <iostream>
-using namespace std;
-
-class Bird {
-public:
-    virtual void move() = 0;
-    virtual ~Bird() = default;
-};
-
-class FlyingBird : public Bird {
-public:
-    void move() override {cout << "Flying" <<endl; }
-};
-
-class Penguin : public Bird {
-public:
-    void move() override {cout << "Swimming" <<endl; }
-};
-```
-
-**Benefit**: The base class `Bird` only defines a generic `move()` behavior, which all subclasses can follow without breaking substitution.
+- If a derived class (e.g., Square) incorrectly overrides the area() method, it might not conform to the expected behavior of the base class. This could lead to incorrect results when using polymorphism, violating LSP.
 
 ---
 
