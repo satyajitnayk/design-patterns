@@ -6,208 +6,245 @@ The **SOLID principles** are five design principles that help developers write c
 4. **I**: **Interface Segregation Principle (ISP)**
 5. **D**: **Dependency Inversion Principle (DIP)**
 
-Here’s an explanation of each principle along with C++ examples.
+### **1. Single Responsibility Principle (SRP)**
 
----
+**Definition**: A class or module should have only one reason to change, meaning it should have one responsibility.
 
-### 1. **Single Responsibility Principle (SRP)**
+#### Example Violating SRP:
 
-**Definition**: A class should have one and only one reason to change. This means a class should have only one responsibility.
-
-#### Example Without SRP:
-
-```cpp
+```c++
 #include <iostream>
-#include <fstream>
+#include <string>
+#include <vector>
 using namespace std;
 
-class Logger {
+class Employee {
+private:
+  string name;
+  double salary;
+
 public:
-    void logToFile(conststring& message) {
-        ofstream file("log.txt", ios::app);
-        file << message << endl;
-        file.close();
-    }
+  Employee(const string &name, double salary) : name(name), salary(salary) {}
+  // Stores employee details (responsibility 1)
+  void printDetails() const {
+    cout << "Employee: " << name << ", Salary: " << salary << endl;
+  }
+  // Calculates tax (responsibility 2)
+  double calculateTax() const {
+    return salary * 0.2; // Example tax calculation
+  }
+  // Generates report (responsibility 3)
+  void generateReport() const {
+    cout << "Report for " << name << ": Tax = " << calculateTax() << endl;
+  }
 };
 ```
 
-**Problem**: `Logger` handles both message generation and file writing.
+**Problems**:
 
-#### Example With SRP:
+- Employee handles multiple responsibilities: storing data, calculating tax, and generating reports.
+- If tax rules or report format changes, the Employee class needs modification, violating SRP.
 
-```cpp
+---
+
+#### Example Following SRP:
+
+```c++
 #include <iostream>
-#include <fstream>
+#include <string>
+#include <vector>
 using namespace std;
 
-class Message {
+class Employee {
+private:
+  string name;
+  double salary;
+
 public:
-    string generateMessage(const string& content) {
-        return "[LOG]: " + content;
-    }
+  Employee(const string &name, double salary) : name(name), salary(salary) {}
+
+  string getName() const { return name; }
+  double getSalary() const { return salary; }
 };
 
-class FileWriter {
+class TaxCalculator {
 public:
-    void writeToFile(const string& message, const string& filename) {
-        ofstream file(filename, ios::app);
-        file << message << endl;
-        file.close();
-    }
+  static double calculateTax(const Employee &employee) {
+    return employee.getSalary() * 0.2; // Example tax calculation
+  }
+};
+
+class ReportGenerator {
+public:
+  static void generateReport(const Employee &employee) {
+    double tax = TaxCalculator::calculateTax(employee);
+    cout << "Report for " << employee.getName() << ": Tax = " << tax << endl;
+  }
 };
 
 int main() {
-    Message msg;
-    FileWriter writer;
-    string log = msg.generateMessage("System started");
-    writer.writeToFile(log, "log.txt");
-    return 0;
+  Employee employee("John Doe", 50000);
+
+  // Print details
+  cout << "Employee: " << employee.getName()
+       << ", Salary: " << employee.getSalary() << endl;
+
+  // Generate report
+  ReportGenerator::generateReport(employee);
+
+  return 0;
 }
 ```
 
-**Benefit**: `Message` generates content, and `FileWriter` handles file writing. Both have distinct responsibilities.
+**Benefits**:
+
+- Change Isolation: Changing tax rules affects only TaxCalculator.
+- Reusability: TaxCalculator can be reused for other purposes, like payroll systems.
+- Readability: Each class has a clear, focused purpose.
 
 ---
 
-### 2. **Open/Closed Principle (OCP)**
+### **2. Open/Closed Principle (OCP)**
 
 **Definition**: A class should be open for extension but closed for modification. You should be able to add new functionality without changing existing code.
 
-#### Example Without OCP:
+#### Example Violating OCP:
 
-```cpp
+```c++
 #include <iostream>
 using namespace std;
 
 class Notification {
 public:
-    void sendNotification(const string& type, const string& message) {
-        if (type == "email") {
-            cout << "Sending Email: " << message << endl;
-        } else if (type == "sms") {
-            cout << "Sending SMS: " << message << endl;
-        }
+  void sendNotification(const string &type, const string &message) {
+    if (type == "email") {
+      cout << "Sending Email: " << message << endl;
+    } else if (type == "sms") {
+      cout << "Sending SMS: " << message << endl;
     }
+  }
 };
-
 ```
 
 **Problem**: Adding a new notification type requires modifying the `sendNotification` method.
 
-#### Example With OCP:
+---
 
-```cpp
+#### Example Following OCP:
+
+```c++
 #include <iostream>
 #include <memory>
 #include <vector>
 using namespace std;
 
-class Notification {
+// Interface renamed to INotifier
+class INotifier {
 public:
-    virtual void send(const string& message) const = 0;
-    virtual ~Notification() = default;
+  virtual void send(const string &message) const = 0;
+  virtual ~INotifier() = default;
 };
 
-class EmailNotification : public Notification {
+// Concrete implementation renamed to EmailNotifier
+class EmailNotifier : public INotifier {
 public:
-    void send(const string& message) const override {
-        cout << "Sending Email: " << message << endl;
-    }
+  void send(const string &message) const override {
+    cout << "Sending Email: " << message << endl;
+  }
 };
 
-class SMSNotification : public Notification {
+// Concrete implementation renamed to SMSNotifier
+class SMSNotifier : public INotifier {
 public:
-    void send(const string& message) const override {
-        cout << "Sending SMS: " << message << endl;
-    }
+  void send(const string &message) const override {
+    cout << "Sending SMS: " << message << endl;
+  }
 };
 
 class NotificationSender {
 private:
-    vector<shared_ptr<Notification>> notifications;
-public:
-    void addNotification(const shared_ptr<Notification>& notification) {
-        notifications.push_back(notification);
-    }
+  vector<shared_ptr<INotifier>> notifiers;
 
-    void notifyAll(const string& message) {
-        for (const auto& notification : notifications) {
-            notification->send(message);
-        }
+public:
+  void addNotifier(const shared_ptr<INotifier> &notifier) {
+    notifiers.push_back(notifier);
+  }
+
+  void notifyAll(const string &message) {
+    for (const auto &notifier : notifiers) {
+      notifier->send(message);
     }
+  }
 };
 
 int main() {
-    auto email = make_shared<EmailNotification>();
-    auto sms = make_shared<SMSNotification>();
-    NotificationSender sender;
-    sender.addNotification(email);
-    sender.addNotification(sms);
-    sender.notifyAll("System update available!");
-    return 0;
+  auto email = make_shared<EmailNotifier>();
+  auto sms = make_shared<SMSNotifier>();
+  NotificationSender sender;
+  sender.addNotifier(email);
+  sender.addNotifier(sms);
+  sender.notifyAll("System update available!");
+  return 0;
 }
 ```
 
-**Benefit**: Adding a new notification type (e.g., PushNotification) doesn’t require modifying `NotificationSender`.
+**Benefit**: Adding a new notification type only requires creating a new struct that implements `Notifier`.
 
-### 3. **Liskov Substitution Principle (LSP)**
+---
 
-**Definition**: Subtypes should work everywhere their base types are used without breaking the program or changing its expected behavior.
+### **3. Liskov Substitution Principle (LSP)**
+
+**Definition**: Subtypes should be replaceable with their base types without altering the correctness of the program.
 
 ```cpp
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 using namespace std;
 
-// Base Class
-class Shape {
+// interface IShape
+class IShape {
 public:
-    virtual double area() const = 0; // Pure virtual function
-    virtual ~Shape() = default;     // Virtual destructor
+  virtual double area() const = 0; // Pure virtual function
+  virtual ~IShape() = default;     // Virtual destructor
 };
 
 // Derived Class: Rectangle
-class Rectangle : public Shape {
+class Rectangle : public IShape {
 private:
-    double width, height;
+  double width, height;
+
 public:
-    Rectangle(double w, double h) : width(w), height(h) {}
-    double area() const override {
-        return width * height;
-    }
+  Rectangle(double w, double h) : width(w), height(h) {}
+  double area() const override { return width * height; }
 };
 
 // Derived Class: Square
-class Square : public Shape {
+class Square : public IShape {
 private:
-    double side;
+  double side;
+
 public:
-    Square(double s) : side(s) {}
-    double area() const override {
-        return side * side;
-    }
+  Square(double s) : side(s) {}
+  double area() const override { return side * side; }
 };
 
 // Function to demonstrate LSP
-void printAreas(const vector<shared_ptr<Shape>>& shapes) {
-    for (const auto& shape : shapes) {
-        cout << "Area: " << shape->area() << endl;
-    }
+void printAreas(const vector<shared_ptr<IShape>> &shapes) {
+  for (const auto &shape : shapes) {
+    cout << "Area: " << shape->area() << endl;
+  }
 }
 
 int main() {
-    // Create instances of Rectangle and Square
-    auto rectangle = make_shared<Rectangle>(4.0, 5.0);
-    auto square = make_shared<Square>(3.0);
-
-    // Store them in a vector of Shape pointers
-    vector<shared_ptr<Shape>> shapes = {rectangle, square};
-
-    // LSP: Both Rectangle and Square can be treated as Shape
-    printAreas(shapes);
-
-    return 0;
+  // Create instances of Rectangle and Square
+  auto rectangle = make_shared<Rectangle>(4.0, 5.0);
+  auto square = make_shared<Square>(3.0);
+  // Store them in a vector of IShape pointers
+  vector<shared_ptr<IShape>> Ishapes = {rectangle, square};
+  // LSP: Both Rectangle and Square can be treated as IShape
+  printAreas(Ishapes);
+  return 0;
 }
 ```
 
@@ -221,58 +258,118 @@ int main() {
 
 ---
 
-### 4. **Interface Segregation Principle (ISP)**
+### **4. Interface Segregation Principle (ISP)**
 
-**Definition**: A class should not be forced to implement interfaces it does not use. Instead, create smaller, specific interfaces.
+**Definition**: A class should not be forced to implement interfaces it does not use.Instead, create smaller, specific interfaces.
 
-#### Example Violating ISP:
+**Scenario: Device Management System**
+
+Consider a device management system where different types of devices have different capabilities:
+
+- Printers can print.
+- Scanners can scan.
+- Multi-functional devices can print, scan, and fax.
+
+**Violation of ISP**
+
+A single `Device` interface with all methods (e.g., `print()`, `scan()`, `fax()`) would force all device classes to implement unused methods.
+
+**Solution: Apply ISP**
+
+Break the interface into smaller, role-specific interfaces: `IPrinter`, `IScanner`, and `IFax`.
 
 ```cpp
-class Animal {
+#include <iostream>
+#include <memory>
+using namespace std;
+
+// Role-specific interfaces
+class IPrinter {
 public:
-    virtual void fly() = 0;
-    virtual void swim() = 0;
-    virtual void run() = 0;
+  virtual void print(const string &document) const = 0;
+  virtual ~IPrinter() = default;
 };
+
+class IScanner {
+public:
+  virtual void scan(const string &document) const = 0;
+  virtual ~IScanner() = default;
+};
+
+class IFax {
+public:
+  virtual void fax(const string &document) const = 0;
+  virtual ~IFax() = default;
+};
+
+// Concrete classes implementing only relevant interfaces
+
+class Printer : public IPrinter {
+public:
+  void print(const string &document) const override {
+    cout << "Printing: " << document << endl;
+  }
+};
+
+class Scanner : public IScanner {
+public:
+  void scan(const string &document) const override {
+    cout << "Scanning: " << document << endl;
+  }
+};
+
+class MultiFunctionDevice : public IPrinter, public IScanner, public IFax {
+public:
+  void print(const string &document) const override {
+    cout << "Multi-function device printing: " << document << endl;
+  }
+
+  void scan(const string &document) const override {
+    cout << "Multi-function device scanning: " << document << endl;
+  }
+
+  void fax(const string &document) const override {
+    cout << "Multi-function device faxing: " << document << endl;
+  }
+};
+
+// Client code
+void performDeviceOperations() {
+  auto printer = make_shared<Printer>();
+  auto scanner = make_shared<Scanner>();
+  auto mfd = make_shared<MultiFunctionDevice>();
+
+  printer->print("Document 1");
+  scanner->scan("Document 2");
+  mfd->print("Document 3");
+  mfd->scan("Document 4");
+  mfd->fax("Document 5");
+}
+
+int main() {
+  performDeviceOperations();
+  return 0;
+}
 ```
 
-**Problem**: A `Dog` does not need to implement `fly()`, but it is forced to.
+### **Explanation**
 
-#### Example Following ISP:
+1. **Interface Segregation**:
+   - `IPrinter`, `IScanner`, and `IFax` are small, focused interfaces, ensuring classes only implement the functionality they need.
+2. **Concrete Classes**:
+   - `Printer` implements only `IPrinter`.
+   - `Scanner` implements only `IScanner`.
+   - `MultiFunctionDevice` implements all three.
+3. **Client Code**:
+   - Uses the most specific interface for the required functionality, improving flexibility.
 
-```cpp
-class Flyable {
-public:
-    virtual void fly() = 0;
-    virtual ~Flyable() = default;
-};
+### **Benefits**
 
-class Swimable {
-public:
-    virtual void swim() = 0;
-    virtual ~Swimable() = default;
-};
+1. **Flexibility**: Easier to add new device types without modifying existing interfaces or classes.
+2. **Clarity**: Classes are not bloated with irrelevant methods.
+3. **Scalability**: Adding new capabilities is straightforward by creating new interfaces (e.g., `ICloudPrinter`).
 
-class Runnable {
-public:
-    virtual void run() = 0;
-    virtual ~Runnable() = default;
-};
-
-class Dog : public Runnable {
-public:
-    void run() override {cout << "Dog is running" <<endl; }
-};
-
-class Bird : public Flyable {
-public:
-    void fly() override {cout << "Bird is flying" <<endl; }
-};
-```
-
-**Benefit**: Classes implement only the methods relevant to them.
-
-### 5. **Dependency Inversion Principle (DIP)**
+### **5. Dependency Inversion Principle (DIP)**
 
 **Definition**: High-level modules should not depend on low-level modules. Both should depend on abstractions.
 
@@ -281,51 +378,50 @@ public:
 #include <memory>
 using namespace std;
 
-class Payment {
+class IPayment {
 public:
-    virtual void processPayment(double amount) = 0;
-    virtual ~Payment() = default;
+  virtual void processPayment(double amount) = 0;
+  virtual ~IPayment() = default;
 };
 
-class CreditCardPayment : public Payment {
+class CreditCardPayment : public IPayment {
 public:
-    void processPayment(double amount) override {
-        cout << "Processing credit card payment of $" << amount << endl;
-    }
+  void processPayment(double amount) override {
+    cout << "Processing credit card payment of $" << amount << endl;
+  }
 };
 
-class PayPalPayment : public Payment {
+class PayPalPayment : public IPayment {
 public:
-    void processPayment(double amount) override {
-        cout << "Processing PayPal payment of $" << amount << endl;
-    }
+  void processPayment(double amount) override {
+    cout << "Processing PayPal payment of $" << amount << endl;
+  }
 };
 
 class PaymentProcessor {
 private:
-    shared_ptr<Payment> payment;
-public:
-    PaymentProcessor(shared_ptr<Payment> p) : payment(p) {}
+  shared_ptr<IPayment> payment;
 
-    void makePayment(double amount) {
-        payment->processPayment(amount);
-    }
+public:
+  PaymentProcessor(shared_ptr<IPayment> p) : payment(p) {}
+
+  void makePayment(double amount) { payment->processPayment(amount); }
 };
 
 int main() {
-    auto creditCard = make_shared<CreditCardPayment>();
-    PaymentProcessor processor(creditCard);
-    processor.makePayment(100.0);
+  auto creditCard = make_shared<CreditCardPayment>();
+  PaymentProcessor processor(creditCard);
+  processor.makePayment(100.0);
 
-    auto payPal = make_shared<PayPalPayment>();
-    processor = PaymentProcessor(payPal);
-    processor.makePayment(200.0);
+  auto payPal = make_shared<PayPalPayment>();
+  processor = PaymentProcessor(payPal);
+  processor.makePayment(200.0);
 
-    return 0;
+  return 0;
 }
 ```
 
-**Benefit**: The `PaymentProcessor` depends on an abstraction (`Payment`), not specific implementations, making it flexible and extensible.
+**Benefit**: The `PaymentProcessor` depends on an abstraction (`IPayment`), not specific implementations, making it flexible and extensible.
 
 ---
 
@@ -336,5 +432,5 @@ int main() {
 | Single Responsibility | One class = one responsibility.                       | Reduces coupling and increases clarity.                |
 | Open/Closed           | Open to extension, closed to modification.            | Easier to add features without changing core code.     |
 | Liskov Substitution   | Subtypes must replace their base types seamlessly.    | Avoids unexpected behaviors in polymorphism.           |
-| Interface Segregation | Use small, focused interfaces.                        | Prevents classes from implementing irrelevant methods. |
+| Interface Segregation | Use small, focused interfaces.                        | Prevents structs from implementing irrelevant methods. |
 | Dependency Inversion  | Depend on abstractions, not concrete implementations. | Promotes loose coupling and testability.               |
