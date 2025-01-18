@@ -4,8 +4,6 @@
 
 The **Adapter Design Pattern** is a **structural design pattern** that allows incompatible interfaces to work together by acting as a bridge between them.
 
----
-
 ### Key Points:
 
 1. **Purpose**:
@@ -40,6 +38,54 @@ The **Adapter Design Pattern** is a **structural design pattern** that allows in
 4. **Client**: Uses the target interface (`clientCode`).
 
 ---
+
+```c++
+#include <iostream>
+#include <memory>
+#include <string>
+
+using namespace std;
+
+// Old system
+class OldLogger {
+public:
+  void logMessage(string message) {
+    cout << "Old log format: " << message << endl;
+  }
+};
+
+// New system interface (what we want to use)
+class NewLogger {
+public:
+  virtual void log(string message) = 0;
+};
+
+// Adapter class to make OldLogger compatible with NewLogger
+class LoggerAdapter : public NewLogger {
+private:
+  unique_ptr<OldLogger> oldLogger;
+
+public:
+  LoggerAdapter(unique_ptr<OldLogger> oldLogger)
+      : oldLogger(std::move(oldLogger)) {}
+
+  void log(string message) override {
+    // Adapting the old logging method to fit the new interface
+    oldLogger->logMessage(message);
+  }
+};
+
+int main() {
+  auto oldLogger = make_unique<OldLogger>();
+  auto adapter = make_unique<LoggerAdapter>(std::move(oldLogger));
+
+  // Now we can use the new system's interface, but it's calling the old
+  // system underneath
+  adapter->log("This is a log message");
+
+  return 0;
+}
+```
 
 ### Common Interview Questions:
 
