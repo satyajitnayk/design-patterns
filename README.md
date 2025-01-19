@@ -4,10 +4,10 @@ This repository contains various design patterns categorized by their type. Belo
 
 ## Important Design Principles:
 
-1. DRY - Don't Repeat Yourself.
-2. YAGNI - You Aren't Gonna Need It.
-3. KISS - Keep It Simple Stupid.
-4. SOLID Principles: The SOLID principles are a set of five design principles that help to create more understandable, flexible, and maintainable code:
+1. **DRY** - Don't Repeat Yourself.
+2. **YAGNI** - You Aren't Gonna Need It.
+3. **KISS** - Keep It Simple Stupid.
+4. **SOLID Principles**: The SOLID principles are a set of five design principles that help to create more understandable, flexible, and maintainable code:
    [SOLID PRINCIPLES](solid-principles.md)
    - **S** - Single Responsibility Principle (SRP): A class should have only one reason to change, meaning it should only have one job or responsibility.
    - **O** - Open/Closed Principle (OCP): Software entities should be open for extension but closed for modification.
