@@ -2,17 +2,18 @@
 
 This repository contains various design patterns categorized by their type. Below you'll find a list of behavioral, creational, and structural design patterns with links to their respective Markdown files for detailed explanations and examples.
 
-## SOLID Principles
+## Important Design Principles:
 
-[SOLID PRINCIPLES](solid-principles.md)
-
-The SOLID principles are a set of five design principles that help to create more understandable, flexible, and maintainable code:
-
-1. **S** - Single Responsibility Principle (SRP): A class should have only one reason to change, meaning it should only have one job or responsibility.
-2. **O** - Open/Closed Principle (OCP): Software entities should be open for extension but closed for modification.
-3. **L** - Liskov Substitution Principle (LSP): Objects of a superclass should be replaceable with objects of a subclass without affecting the correctness of the program.
-4. **I** - Interface Segregation Principle (ISP): No client should be forced to depend on methods it does not use.
-5. **D** - Dependency Inversion Principle (DIP): High-level modules should not depend on low-level modules. Both should depend on abstractions.
+1. DRY - Don't Repeat Yourself.
+2. YAGNI - You Aren't Gonna Need It.
+3. KISS - Keep It Simple Stupid.
+4. SOLID Principles: The SOLID principles are a set of five design principles that help to create more understandable, flexible, and maintainable code:
+   [SOLID PRINCIPLES](solid-principles.md)
+   - **S** - Single Responsibility Principle (SRP): A class should have only one reason to change, meaning it should only have one job or responsibility.
+   - **O** - Open/Closed Principle (OCP): Software entities should be open for extension but closed for modification.
+   - **L** - Liskov Substitution Principle (LSP): Objects of a superclass should be replaceable with objects of a subclass without affecting the correctness of the program.
+   - **I** - Interface Segregation Principle (ISP): No client should be forced to depend on methods it does not use.
+   - **D** - Dependency Inversion Principle (DIP): High-level modules should not depend on low-level modules. Both should depend on abstractions.
 
 ## Design Patterns
 
